@@ -23,7 +23,7 @@ function App() {
           <div className="flex items-center space-x-3 mb-8 hover-card p-3 rounded-lg">
             <Shield className="w-8 h-8 text-cyan-400" />
             <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">
-              NetVulnSecure
+              NetGaurd
             </span>
           </div>
           
