@@ -1,15 +1,15 @@
-from typing import Optional
+from typing import Optional,List
 from fastapi import FastAPI,BackgroundTasks
 import socket
 import time
 import threading
 from fastapi.responses import JSONResponse
-from scapy.all import sniff,IP,TCP,UDP
+from scapy.all import sniff,IP,TCP,UDP 
 from pydantic import BaseModel
 from collections import deque
 
 app=FastAPI()
-PORT = 8001
+PORT = 8000
 INTERFACE='wlp0s20f3'
 
 class packetInfo(BaseModel):
@@ -35,7 +35,7 @@ def process_packet(packet):
     }
     if IP in packet:
         packet_info["source_ip"]=packet[IP].src
-        packet_info["dest_ip"]=packet[IP].dest
+        packet_info["dest_ip"]=packet[IP].dst
     packet_buffer.append(packetInfo(**packet_info))    
 
 def capture_packet():
@@ -63,6 +63,14 @@ async def start_capture():
     return {"message": "Packet capture started"}
 
 
+@app.get("/packets",response_model=List[packetInfo])
+async def get_packets(limit:int =100):
+    packet =list(packet_buffer)[-limit:]
+    return packet
+
+
+
+
 
 @app.get("/")
 def hello():
@@ -77,5 +85,5 @@ if __name__=="__main__":
 
 
 
-# host_name = socket.gethostbyaddr("8.8.8.8")
-# print(host_name)
+# # host_name = socket.gethostbyaddr("8.8.8.8")
+# # # print(host_name)
