@@ -86,6 +86,20 @@ async def get_packets(limit:int =100):
     packet =list(packet_buffer)[-limit:]
     return packet
 
+@app.post("/stop")
+def stop_capturing():
+    global capturing, capturing_thread
+
+    if not capturing:
+        return JSONResponse(
+            status_code=400,
+            content={"message":"No capture is running"}
+        )
+    capturing=False
+    if capturing_thread:
+        capturing_thread.join()
+        capturing_thread=None
+    return {"message": "Packet capture stopped"}    
 
 
 
