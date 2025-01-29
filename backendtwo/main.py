@@ -36,6 +36,16 @@ def process_packet(packet):
     if IP in packet:
         packet_info["source_ip"]=packet[IP].src
         packet_info["dest_ip"]=packet[IP].dst
+        packet_info["source_host"]=get_hostname(packet[IP].src)
+        packet_info["dest_host"]=get_hostname(packet[IP].dst)
+        if TCP in packet:
+            packet_info["protocol"] = "TCP"
+            packet_info["source_port"] = packet[TCP].sport
+            packet_info["dest_port"] = packet[TCP].dport
+        elif UDP in packet:
+            packet_info["protocol"] = "UDP"
+            packet_info["source_port"] = packet[UDP].sport
+            packet_info["dest_port"] = packet[UDP].dport
     packet_buffer.append(packetInfo(**packet_info))    
 
 def capture_packet():
@@ -46,6 +56,14 @@ def capture_packet():
         except Exception as e:
             print(f"capture errror :{e}")
             break
+
+
+def get_hostname(ip:str)->str:
+    try:
+        host_name,_,_=socket.gethostbyaddr(ip)
+        return host_name
+    except socket.herror:
+        return None    
 
 
 @app.post("/capture/start")
