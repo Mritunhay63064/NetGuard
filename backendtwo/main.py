@@ -7,6 +7,7 @@ from fastapi.responses import JSONResponse
 from scapy.all import sniff,IP,TCP,UDP 
 from pydantic import BaseModel
 from collections import deque
+import subprocess
 
 app=FastAPI()
 PORT = 8000
@@ -104,6 +105,20 @@ def stop_capturing():
 
 
 
+
+
+
+#webscan services
+
+def run_nikto(url):
+    result=subprocess.run(["sudo","nikto","-h",url],capture_output=True,text=True)
+    # print(result.stdout)
+    return result.stdout
+
+
+# run_nmap('http://bounty-birbal-ruby.vercel.app')
+
+
 @app.get("/")
 def hello():
     return{"message":"hello "}
@@ -119,3 +134,10 @@ if __name__=="__main__":
 
 # # host_name = socket.gethostbyaddr("8.8.8.8")
 # # # print(host_name)
+# Yes, when you use Yes, when you use the sniff() function with the prn=process_packet argument, Scapy automatically passes each captured packet to the process_packet function as an input.the sniff() function with the prn=process_packet argument, Scapy automatically passes each captured packet to the process_packet function as an input.
+
+
+
+# import subprocess
+
+# subprocess.run(['sudo', 'nmap', '-sn', '192.168.1.0/24'])
