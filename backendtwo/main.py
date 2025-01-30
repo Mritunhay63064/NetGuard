@@ -8,10 +8,14 @@ from scapy.all import sniff,IP,TCP,UDP
 from pydantic import BaseModel
 from collections import deque
 import subprocess
+import logging
 
 app=FastAPI()
 PORT = 8000
 INTERFACE='wlp0s20f3'
+
+logging.basicConfig(level=logging.INFO)
+logger=logging.getLogger(__name__)
 
 class packetInfo(BaseModel):
     timestamp:float
@@ -112,12 +116,14 @@ def stop_capturing():
 
 def run_nikto(url:str):
     result=subprocess.run(["sudo","nikto","-h",url],capture_output=True,text=True)
-    print(result.stdout)
+    # print(result.stdout)
+    logger.info(result.stdout)
     return result.stdout
 
 def run_nmap(url:str):
     result=subprocess.run(['sudo','nmap','-p','80,443',url],capture_output=True,text=True)
-    print(result.stdout)
+    # print(result.stdout)
+    logger.info(result.stdout)
     return(result.stdout)
 
 # run_nmap('http://bounty-birbal-ruby.vercel.app')
