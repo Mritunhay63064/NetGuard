@@ -1,44 +1,210 @@
-from typing import Optional,List
-from fastapi import FastAPI,BackgroundTasks
+# from typing import Optional,List
+# from fastapi import FastAPI,BackgroundTasks, HTTPException
+# import socket
+# import time
+# import threading
+# from fastapi.responses import JSONResponse
+# from scapy.all import sniff,IP,TCP,UDP 
+# from pydantic import BaseModel
+# from collections import deque
+# import subprocess
+
+# app=FastAPI()
+# PORT = 8000
+# INTERFACE='wlp0s20f3'
+
+# class packetInfo(BaseModel):
+#     timestamp:float
+#     source_ip:Optional[str]=None
+#     dest_ip:Optional[str]=None
+#     source_host:Optional[str]=None
+#     dest_host:Optional[str]=None
+#     protocol:str
+#     length:int
+#     source_port:Optional[int]=None
+#     dest_port:Optional[int]=None
+
+# packet_buffer=deque(maxlen=1000)
+# capturing =False
+# capturing_thread=None
+
+# def process_packet(packet):
+#     packet_info={
+#         "timestamp":time.time(),
+#         "protocol":"OTHER",
+#         "length":len(packet),
+#     }
+#     if IP in packet:
+#         packet_info["source_ip"]=packet[IP].src
+#         packet_info["dest_ip"]=packet[IP].dst
+#         packet_info["source_host"]=get_hostname(packet[IP].src)
+#         packet_info["dest_host"]=get_hostname(packet[IP].dst)
+#         if TCP in packet:
+#             packet_info["protocol"] = "TCP"
+#             packet_info["source_port"] = packet[TCP].sport
+#             packet_info["dest_port"] = packet[TCP].dport
+#         elif UDP in packet:
+#             packet_info["protocol"] = "UDP"
+#             packet_info["source_port"] = packet[UDP].sport
+#             packet_info["dest_port"] = packet[UDP].dport
+#     packet_buffer.append(packetInfo(**packet_info))    
+
+# def capture_packet():
+#     global capturing
+#     while capturing:
+#         try:
+#             sniff(iface=INTERFACE,prn=process_packet,store=0,count=1,filter='ip')
+#         except Exception as e:
+#             print(f"capture errror :{e}")
+#             break
+
+
+# def get_hostname(ip:str)->str:
+#     try:
+#         host_name,_,_=socket.gethostbyaddr(ip)
+#         return host_name
+#     except socket.herror:
+#         return None    
+
+
+# @app.post("/capture/start")
+# async def start_capture():
+#     global capturing,capturing_thread
+
+#     if capturing:
+#         return JSONResponse(
+#             status_code=400,
+#             content={"message","Capture already running"}
+#         )
+#     capturing=True
+#     capturing_thread=threading.Thread(target=capture_packet)
+#     capturing_thread.start()
+#     return {"message": "Packet capture started"}
+
+
+# @app.get("/packets",response_model=List[packetInfo])
+# async def get_packets(limit:int =100):
+#     packet =list(packet_buffer)[-limit:]
+#     return packet
+
+# @app.post("/stop")
+# def stop_capturing():
+#     global capturing, capturing_thread
+
+#     if not capturing:
+#         return JSONResponse(
+#             status_code=400,
+#             content={"message":"No capture is running"}
+#         )
+#     capturing=False
+#     if capturing_thread:
+#         capturing_thread.join()
+#         capturing_thread=None
+#     return {"message": "Packet capture stopped"}    
+
+
+
+
+
+
+
+# #webscan services
+
+# def run_nikto(url:str):
+#     result=subprocess.run(["sudo","nikto","-h",url],capture_output=True,text=True)
+#     print(result.stdout)
+#     return result.stdout
+
+# def run_nmap(url:str):
+#     result=subprocess.run(['sudo','nmap','-p','80,443',url],capture_output=True,text=True)
+#     print(result.stdout)
+#     return(result.stdout)
+
+# # run_nmap('http://bounty-birbal-ruby.vercel.app')
+
+
+# @app.post("/scan/{url}")
+# def scan(url:str,background_task:BackgroundTasks):
+#     try:
+#         background_task.add_task(run_nikto,url)
+#         background_task.add_task(run_nmap,url)
+#         return {"message": "Scans started in the background"}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
+        
+
+
+
+# @app.get("/")
+# def hello():
+#     return{"message":"hello "}
+
+# if __name__=="__main__":
+#     import uvicorn
+#     uvicorn.run(app,host="0.0.0.0",port=PORT)
+
+
+
+
+
+
+# # # host_name = socket.gethostbyaddr("8.8.8.8")
+# # # # print(host_name)
+# # Yes, when you use Yes, when you use the sniff() function with the prn=process_packet argument, Scapy automatically passes each captured packet to the process_packet function as an input.the sniff() function with the prn=process_packet argument, Scapy automatically passes each captured packet to the process_packet function as an input.
+
+
+
+# # import subprocess
+
+# # subprocess.run(['sudo', 'nmap', '-sn', '192.168.1.0/24'])
+
+
+
+
+from fastapi import FastAPI, BackgroundTasks, HTTPException
+from fastapi.responses import JSONResponse
+from pydantic import BaseModel
+import subprocess
 import socket
 import time
 import threading
-from fastapi.responses import JSONResponse
-from scapy.all import sniff,IP,TCP,UDP 
-from pydantic import BaseModel
 from collections import deque
-import subprocess
+from scapy.all import sniff, IP, TCP, UDP
+from typing import Optional, List
 
-app=FastAPI()
+app = FastAPI()
 PORT = 8000
-INTERFACE='wlp0s20f3'
+INTERFACE = 'wlp0s20f3'
 
+# Define packet information model
 class packetInfo(BaseModel):
-    timestamp:float
-    source_ip:Optional[str]=None
-    dest_ip:Optional[str]=None
-    source_host:Optional[str]=None
-    dest_host:Optional[str]=None
-    protocol:str
-    length:int
-    source_port:Optional[int]=None
-    dest_port:Optional[int]=None
+    timestamp: float
+    source_ip: Optional[str] = None
+    dest_ip: Optional[str] = None
+    source_host: Optional[str] = None
+    dest_host: Optional[str] = None
+    protocol: str
+    length: int
+    source_port: Optional[int] = None
+    dest_port: Optional[int] = None
 
-packet_buffer=deque(maxlen=1000)
-capturing =False
-capturing_thread=None
+packet_buffer = deque(maxlen=1000)
+capturing = False
+capturing_thread = None
 
+
+# Packet capturing and processing functions
 def process_packet(packet):
-    packet_info={
-        "timestamp":time.time(),
-        "protocol":"OTHER",
-        "length":len(packet),
+    packet_info = {
+        "timestamp": time.time(),
+        "protocol": "OTHER",
+        "length": len(packet),
     }
     if IP in packet:
-        packet_info["source_ip"]=packet[IP].src
-        packet_info["dest_ip"]=packet[IP].dst
-        packet_info["source_host"]=get_hostname(packet[IP].src)
-        packet_info["dest_host"]=get_hostname(packet[IP].dst)
+        packet_info["source_ip"] = packet[IP].src
+        packet_info["dest_ip"] = packet[IP].dst
+        packet_info["source_host"] = get_hostname(packet[IP].src)
+        packet_info["dest_host"] = get_hostname(packet[IP].dst)
         if TCP in packet:
             packet_info["protocol"] = "TCP"
             packet_info["source_port"] = packet[TCP].sport
@@ -47,46 +213,51 @@ def process_packet(packet):
             packet_info["protocol"] = "UDP"
             packet_info["source_port"] = packet[UDP].sport
             packet_info["dest_port"] = packet[UDP].dport
-    packet_buffer.append(packetInfo(**packet_info))    
+    packet_buffer.append(packetInfo(**packet_info))
+
 
 def capture_packet():
     global capturing
     while capturing:
         try:
-            sniff(iface=INTERFACE,prn=process_packet,store=0,count=1,filter='ip')
+            sniff(iface=INTERFACE, prn=process_packet, store=0, count=1, filter='ip')
         except Exception as e:
-            print(f"capture errror :{e}")
+            print(f"Capture error: {e}")
             break
 
 
-def get_hostname(ip:str)->str:
+def get_hostname(ip: str) -> str:
     try:
-        host_name,_,_=socket.gethostbyaddr(ip)
+        host_name, _, _ = socket.gethostbyaddr(ip)
         return host_name
     except socket.herror:
-        return None    
+        return None
 
 
+# Start capturing packets
 @app.post("/capture/start")
 async def start_capture():
-    global capturing,capturing_thread
+    global capturing, capturing_thread
 
     if capturing:
         return JSONResponse(
             status_code=400,
-            content={"message","Capture already running"}
+            content={"message": "Capture already running"}
         )
-    capturing=True
-    capturing_thread=threading.Thread(target=capture_packet)
+    capturing = True
+    capturing_thread = threading.Thread(target=capture_packet)
     capturing_thread.start()
     return {"message": "Packet capture started"}
 
 
-@app.get("/packets",response_model=List[packetInfo])
-async def get_packets(limit:int =100):
-    packet =list(packet_buffer)[-limit:]
+# Get captured packets
+@app.get("/packets", response_model=List[packetInfo])
+async def get_packets(limit: int = 100):
+    packet = list(packet_buffer)[-limit:]
     return packet
 
+
+# Stop capturing packets
 @app.post("/stop")
 def stop_capturing():
     global capturing, capturing_thread
@@ -94,50 +265,45 @@ def stop_capturing():
     if not capturing:
         return JSONResponse(
             status_code=400,
-            content={"message":"No capture is running"}
+            content={"message": "No capture is running"}
         )
-    capturing=False
+    capturing = False
     if capturing_thread:
         capturing_thread.join()
-        capturing_thread=None
-    return {"message": "Packet capture stopped"}    
+        capturing_thread = None
+    return {"message": "Packet capture stopped"}
 
 
+# Web scan services
+def run_nikto(url: str):
+    result = subprocess.run(["sudo", "nikto", "-h", url], capture_output=True, text=True)
+    print(result.stdout)
+    return result.stdout
 
-
-
-
-
-#webscan services
-
-def run_nikto(url):
-    result=subprocess.run(["sudo","nikto","-h",url],capture_output=True,text=True)
-    # print(result.stdout)
+def run_nmap(url: str):
+    result = subprocess.run(['sudo', 'nmap', '-p', '80,443', url], capture_output=True, text=True)
+    print(result.stdout)
     return result.stdout
 
 
-# run_nmap('http://bounty-birbal-ruby.vercel.app')
+@app.post("/scan")
+async def scan(url: str, background_tasks: BackgroundTasks):
+    try:
+        # Run scans in the background to avoid blocking
+        background_tasks.add_task(run_nikto, url)
+        background_tasks.add_task(run_nmap, url)
+
+        return {"message": "Scans started in the background"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
 
 
 @app.get("/")
 def hello():
-    return{"message":"hello "}
+    return {"message": "hello"}
 
-if __name__=="__main__":
+
+# Run the FastAPI application
+if __name__ == "__main__":
     import uvicorn
-    uvicorn.run(app,host="0.0.0.0",port=PORT)
-
-
-
-
-
-
-# # host_name = socket.gethostbyaddr("8.8.8.8")
-# # # print(host_name)
-# Yes, when you use Yes, when you use the sniff() function with the prn=process_packet argument, Scapy automatically passes each captured packet to the process_packet function as an input.the sniff() function with the prn=process_packet argument, Scapy automatically passes each captured packet to the process_packet function as an input.
-
-
-
-# import subprocess
-
-# subprocess.run(['sudo', 'nmap', '-sn', '192.168.1.0/24'])
+    uvicorn.run(app, host="0.0.0.0", port=PORT)
