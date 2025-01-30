@@ -1,5 +1,6 @@
 from typing import Optional,List
 from fastapi import FastAPI,BackgroundTasks, HTTPException
+from fastapi.middleware.cors import CORSMiddleware
 import socket
 import time
 import threading
@@ -11,6 +12,13 @@ import subprocess
 import logging
 
 app=FastAPI()
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"], 
+    allow_credentials=True,
+    allow_methods=["*"], 
+    allow_headers=["*"], 
+)
 PORT = 8000
 INTERFACE='wlp0s20f3'
 
@@ -129,7 +137,7 @@ def run_nmap(url:str):
 # run_nmap('http://bounty-birbal-ruby.vercel.app')
 
 
-@app.post("/scan/{url}")
+@app.post("/scan/")
 def scan(url:str,background_task:BackgroundTasks):
     try:
         background_task.add_task(run_nikto,url)
@@ -148,9 +156,6 @@ def hello():
 if __name__=="__main__":
     import uvicorn
     uvicorn.run(app,host="0.0.0.0",port=PORT)
-
-
-
 
 
 
