@@ -137,16 +137,30 @@ def run_nmap(url:str):
 # run_nmap('http://bounty-birbal-ruby.vercel.app')
 
 
-@app.post("/scan/")
-def scan(url:str,background_task:BackgroundTasks):
-    try:
-        background_task.add_task(run_nikto,url)
-        background_task.add_task(run_nmap,url)
-        return {"message": "Scans started in the background"}
-    except Exception as e:
-        raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
+# @app.post("/scan/")
+# def scan(url:str,background_task:BackgroundTasks):
+#     try:
+#         background_task.add_task(run_nikto,url)
+#         background_task.add_task(run_nmap,url)
+#         return {"message": "Scans started in the background"}
+#     except Exception as e:
+#         raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
         
 
+
+@app.post("/scan/")
+async def scan(url:str):
+    try:
+        
+        nikto_result=run_nikto(url)
+        nmap_result=run_nmap(url)
+        return JSONResponse(content={
+            "nikto_result": nikto_result,
+            "nmap_result": nmap_result
+        })
+        
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
 
 
 @app.get("/")
@@ -168,6 +182,5 @@ if __name__=="__main__":
 # import subprocess
 
 # subprocess.run(['sudo', 'nmap', '-sn', '192.168.1.0/24'])
-
 
 
