@@ -136,18 +136,7 @@ def run_nmap(url:str):
 
 # run_nmap('http://bounty-birbal-ruby.vercel.app')
 
-
-# @app.post("/scan/")
-# def scan(url:str,background_task:BackgroundTasks):
-#     try:
-#         background_task.add_task(run_nikto,url)
-#         background_task.add_task(run_nmap,url)
-#         return {"message": "Scans started in the background"}
-#     except Exception as e:
-#         raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
-        
-
-
+   
 @app.post("/scan/")
 async def scan(url:str):
     try:
@@ -183,4 +172,7 @@ if __name__=="__main__":
 
 # subprocess.run(['sudo', 'nmap', '-sn', '192.168.1.0/24'])
 
+# The ** operator unpacks the dictionary, passing its keys as argument names and values as their respective values to the packetInfo constructor.
+# packetInfo(key1=value1, key2=value2, ...)
 
+# sniff(ifcae=interface_name,prn=function_to_process_that packet,store=0 iska mtlb dont store it in RAM , count=1 iska mtlb catch one packet only at a time ,filter='ip')

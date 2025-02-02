@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Layout, BarChart2, Shield, Search } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { NetworkMonitor } from './components/NetworkMonitor';
@@ -6,6 +6,22 @@ import { VulnerabilityScanner } from './components/VulnerabilityScanner';
 
 function App() {
   const [activeTab, setActiveTab] = useState('dashboard');
+
+  // Mouse position tracking for hover effects
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      document.querySelectorAll('.hover-card, .btn-glow').forEach((el) => {
+        const rect = (el as HTMLElement).getBoundingClientRect();
+        const x = e.clientX - rect.left;
+        const y = e.clientY - rect.top;
+        (el as HTMLElement).style.setProperty('--mouse-x', `${x}px`);
+        (el as HTMLElement).style.setProperty('--mouse-y', `${y}px`);
+      });
+    };
+
+    window.addEventListener('mousemove', handleMouseMove);
+    return () => window.removeEventListener('mousemove', handleMouseMove);
+  }, []);
 
   const navigation = [
     { id: 'dashboard', name: 'Dashboard', icon: <Layout className="w-5 h-5" /> },
@@ -15,27 +31,30 @@ function App() {
 
   return (
     <div className="min-h-screen bg-black text-white flex relative overflow-hidden">
-      <div className="absolute inset-0 cyber-grid opacity-20"></div>
+      <div className="absolute inset-0 cyber-grid opacity-30"></div>
       
       {/* Sidebar */}
       <div className="w-64 gradient-dark shadow-2xl relative z-10">
         <div className="p-6">
-          <div className="flex items-center space-x-3 mb-8 hover-card p-3 rounded-lg">
-            <Shield className="w-8 h-8 text-cyan-400" />
-            <span className="text-xl font-bold bg-gradient-to-r from-cyan-400 to-blue-500 text-transparent bg-clip-text">
-              NetGaurd
+          <div 
+            className="flex items-center space-x-3 mb-8 hover-card p-4 rounded-lg glitch-container"
+            data-text="NetVulnSecure"
+          >
+            <Shield className="w-8 h-8 text-teal-400" />
+            <span className="text-xl font-bold text-holographic">
+              NetVulnSecure
             </span>
           </div>
           
-          <nav className="space-y-2">
+          <nav className="space-y-3">
             {navigation.map((item) => (
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg smooth-transition btn-glow ${
+                className={`w-full flex items-center space-x-3 px-4 py-3 rounded-lg btn-glow ${
                   activeTab === item.id
-                    ? 'bg-cyan-500/10 text-cyan-400 shadow-lg shadow-cyan-500/20'
-                    : 'text-gray-400 hover:bg-gray-800/50 hover:text-cyan-300'
+                    ? 'bg-gradient-to-r from-teal-500/20 to-cyan-500/20 text-teal-300'
+                    : 'text-gray-400 hover:text-teal-300'
                 }`}
               >
                 {item.icon}
@@ -47,7 +66,7 @@ function App() {
       </div>
 
       {/* Main Content */}
-      <div className="flex-1 overflow-auto bg-gradient-to-br from-gray-900 to-black relative z-10">
+      <div className="flex-1 overflow-auto relative z-10">
         <div className="fade-in">
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'network' && <NetworkMonitor />}

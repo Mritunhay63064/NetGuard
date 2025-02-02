@@ -11,7 +11,7 @@ export interface NetworkDevice {
 export interface Vulnerability {
   id: string;
   type: string;
-  severity: 'low' | 'medium' | 'high';
+  severity: 'critical' | 'high' | 'medium' | 'low';
   description: string;
   recommendation: string;
   timestamp: string;
@@ -21,8 +21,23 @@ export interface Vulnerability {
 export interface ScanResult {
   id: string;
   url: string;
-  timestamp: string;
+  targetInfo: {
+    ip: string;
+    hostname: string;
+    port: string;
+    server: string;
+  };
+  timing: {
+    startTime: string;
+    endTime: string;
+    duration: number;
+  };
   status: 'scanning' | 'completed' | 'failed';
+  summary: {
+    totalErrors: number;
+    totalIssues: number;
+    isSuccessful: boolean;
+  };
   vulnerabilities: Vulnerability[];
 }
 
