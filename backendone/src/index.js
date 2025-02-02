@@ -11,7 +11,8 @@ const genAI = new GoogleGenerativeAI("AIzaSyDTcaDH7Fyy-vVqnNxAGiPY6SlcRZbf05U");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 app.post('/scaninsight',async(req,res)=>{
     try{
-        const prompt=req.body.prompt; 
+        const prompt=req.body.data; 
+        // console.log(prompt);
         const  formattedPrompt = `
             the most important thing , dont forget it ,i want response from you only in json format ,i dont want any explanation or story
             you will be given nikto and nmap scan results of a website, your task is to analyze and give the result in the form of JSON:

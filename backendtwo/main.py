@@ -136,25 +136,27 @@ def run_nmap(url:str):
 
 # run_nmap('http://bounty-birbal-ruby.vercel.app')
 
-   
+class ScanRequest(BaseModel):
+    url: str   
 
 scan_res={}
 @app.post("/scan/")
-async def scan(url:str):
+async def scan(request: ScanRequest):
     try:
-        scan_id=str(time.time())
-        scan_res[scan_id]={"status":"under progress"}
-        nikto_result=run_nikto(url)
-        nmap_result=run_nmap(url)
-        scan_res[scan_id]={
+        url = request.url  # Extract URL from JSON body
+        scan_id = str(time.time())
+        scan_res[scan_id] = {"status": "under progress"}
+
+        nikto_result = run_nikto(url)
+        nmap_result = run_nmap(url)
+
+        scan_res[scan_id] = {
             "nikto_result": nikto_result,
             "nmap_result": nmap_result,
-            "status":"completed",
+            "status": "completed",
         }
-        return JSONResponse(content={
-            "scan_id":scan_id
-            })
-        
+        return JSONResponse(content={"scan_id": scan_id})
+
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
 
