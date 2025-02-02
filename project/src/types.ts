@@ -8,14 +8,11 @@ export interface NetworkDevice {
   lastSeen: string;
 }
 
-export interface Vulnerability {
-  id: string;
-  type: string;
-  severity: 'critical' | 'high' | 'medium' | 'low';
-  description: string;
-  recommendation: string;
-  timestamp: string;
-  status: 'open' | 'resolved';
+export interface NetworkStats {
+  packetsPerSecond: number;
+  bandwidthUsage: number;
+  activeConnections: number;
+  alertsCount: number;
 }
 
 export interface ScanResult {
@@ -30,7 +27,7 @@ export interface ScanResult {
   timing: {
     startTime: string;
     endTime: string;
-    duration: number;
+    duration: string;
   };
   status: 'scanning' | 'completed' | 'failed';
   summary: {
@@ -41,9 +38,12 @@ export interface ScanResult {
   vulnerabilities: Vulnerability[];
 }
 
-export interface NetworkStats {
-  packetsPerSecond: number;
-  bandwidthUsage: number;
-  activeConnections: number;
-  alertsCount: number;
+export interface Vulnerability {
+  id: string;
+  type: string;
+  severity: 'critical' | 'high' | 'medium' | 'low';
+  description: string;
+  recommendation?: string;
+  timestamp: string;
+  status: 'open' | 'resolved';
 }

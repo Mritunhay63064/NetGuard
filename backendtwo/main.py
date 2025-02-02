@@ -138,20 +138,35 @@ def run_nmap(url:str):
 
    
 
-
+scan_res={}
 @app.post("/scan/")
 async def scan(url:str):
     try:
-        
+        scan_id=str(time.time())
+        scan_res[scan_id]={"status":"under progress"}
         nikto_result=run_nikto(url)
         nmap_result=run_nmap(url)
-        return JSONResponse(content={
+        scan_res[scan_id]={
             "nikto_result": nikto_result,
-            "nmap_result": nmap_result
-        })
+            "nmap_result": nmap_result,
+            "status":"completed",
+        }
+        return JSONResponse(content={
+            "scan_id":scan_id
+            })
         
     except Exception as e:
         raise HTTPException(status_code=500, detail=f"Error during scan: {e}")
+
+
+
+@app.get('/scan_status')
+async def scan_status(scan_id:str):
+    if scan_id in scan_res:
+        return JSONResponse(content=scan_res[scan_id])
+    else:
+        return JSONResponse(content={"status":"id not found"}) 
+
 
 
 @app.get("/")
