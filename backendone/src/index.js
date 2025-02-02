@@ -7,7 +7,7 @@ const PORT=5000;
 app.use(express.json())
 app.use(cors());
 
-const genAI = new GoogleGenerativeAI("AIzaSyDTcaDH7Fyy-vVqnNxAGiPY6SlcRZbf05U");
+const genAI = new GoogleGenerativeAI("");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 app.post('/scaninsight',async(req,res)=>{
     try{
