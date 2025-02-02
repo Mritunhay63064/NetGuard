@@ -137,6 +137,8 @@ def run_nmap(url:str):
 # run_nmap('http://bounty-birbal-ruby.vercel.app')
 
    
+
+
 @app.post("/scan/")
 async def scan(url:str):
     try:

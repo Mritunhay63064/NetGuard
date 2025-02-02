@@ -7,12 +7,13 @@ const PORT=5000;
 app.use(express.json())
 app.use(cors());
 
-const genAI = new GoogleGenerativeAI("");
+const genAI = new GoogleGenerativeAI("AIzaSyDTcaDH7Fyy-vVqnNxAGiPY6SlcRZbf05U");
 const model = genAI.getGenerativeModel({ model: "gemini-1.5-flash" });
 app.post('/scaninsight',async(req,res)=>{
     try{
         const prompt=req.body.prompt; 
         const  formattedPrompt = `
+            the most important thing , dont forget it ,i want response from you only in json format ,i dont want any explanation or story
             you will be given nikto and nmap scan results of a website, your task is to analyze and give the result in the form of JSON:
             
             
@@ -23,7 +24,7 @@ app.post('/scaninsight',async(req,res)=>{
             Scan Start Time: (e.g., 2025-02-02 13:16:29)
             Scan End Time: (e.g., 2025-02-02 13:29:56)
             Scan Duration: (e.g., 807 seconds)
-            Vulnerability Data (Errors & Severity):
+            Vulnerability Data :
             Found Errors:
             Vulnerability Severity:
             Critical -> High, Medium, or Low
@@ -32,26 +33,12 @@ app.post('/scaninsight',async(req,res)=>{
             letss do on test 
             suppose i give you this data ,give the repose in the way i told
             the data is
-            INFO:__main__:- Nikto v2.1.5
-            ---------------------------------------------------------------------------
-            + Target IP:          216.198.79.193
-            + Target Hostname:    twitter-quote-six.vercel.app
-            + Target Port:        443
-            + Start Time:         2025-02-02 13:16:29 (GMT5.5)
-            ---------------------------------------------------------------------------
-            + Server: Vercel
-            + The anti-clickjacking X-Frame-Options header is not present.
-            + Uncommon header 'refresh' found, with contents: 0;url=https://twitter-quote-six.vercel.app/
-            + Root page / redirects to: https://twitter-quote-six.vercel.app/
-            + No CGI Directories found (use '-C all' to force check all possible dirs)
-            + 6544 items checked: 15 error(s) and 2 item(s) reported on remote host
-            + End Time:           2025-02-02 13:29:56 (GMT5.5) (807 seconds)
-            ---------------------------------------------------------------------------
-            + 1 host(s) tested
-
-            INFO:__main__:Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-02-02 13:29 IST
-            Nmap done: 0 IP addresses (0 hosts up) scanned in 0.02 seconds
+            {
+    
+             "- Nikto v2.1.5\n---------------------------------------------------------------------------\n+ Target IP:          216.198.79.129\n+ Target Hostname:    expense-tracker-orcin-five.vercel.app\n+ Target Port:        443\n+ Start Time:         2025-02-02 16:47:16 (GMT5.5)\n---------------------------------------------------------------------------\n+ Server: Vercel\n+ The anti-clickjacking X-Frame-Options header is not present.\n+ Uncommon header 'refresh' found, with contents: 0;url=https://expense-tracker-orcin-five.vercel.app/\n+ Root page / redirects to: https://expense-tracker-orcin-five.vercel.app/\n",
+               "Starting Nmap 7.94SVN ( https://nmap.org ) at 2025-02-02 16:47 IST\nNmap done: 0 IP addresses (0 hosts up) scanned in 0.05 seconds\n"
             
+            }
             so for this the output should be like
             {
               "Target IP": "216.198.79.193",
@@ -61,7 +48,7 @@ app.post('/scaninsight',async(req,res)=>{
               "Scan Start Time": "2025-02-02 13:16:29",
               "Scan End Time": "2025-02-02 13:29:56",
               "Scan Duration": "807 seconds",
-              "Vulnerability Data (Errors & Severity)": {
+              "Vulnerability Data ": {
                 "Found Errors": [
                   "The anti-clickjacking X-Frame-Options header is not present.",
                   "Uncommon header 'refresh' found, with contents: 0;url=https://twitter-quote-six.vercel.app/"
@@ -77,7 +64,7 @@ app.post('/scaninsight',async(req,res)=>{
             }
             
             now here is real data which you have look into
-            ${prompt}
+             ${prompt.nikto_result}${prompt.nmap_result}
             `;
         const result = await model.generateContent(formattedPrompt);
         const unparsedreaponse=result.response.text();
