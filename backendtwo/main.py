@@ -160,7 +160,7 @@ class BlockRequest(BaseModel):
 
 def get_mac_address(ip: str) -> str:
     try:
-        # Run the ARP command to find the MAC address
+        # Run the ARP command to find the MAC addresss
         cmd = f"arp -n {ip}"
         # arp -n | grep 192.168.1.3
         result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
