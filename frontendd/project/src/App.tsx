@@ -1,11 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { Layout, BarChart2, Shield, Search } from 'lucide-react';
+import { Layout, BarChart2, Shield, Search, Home as HomeIcon } from 'lucide-react';
 import { Dashboard } from './components/Dashboard';
 import { NetworkMonitor } from './components/NetworkMonitor';
 import { VulnerabilityScanner } from './components/VulnerabilityScanner';
+import { Home } from './components/Home';
+import { Terminal } from './components/Terminal';
 
 function App() {
-  const [activeTab, setActiveTab] = useState('dashboard');
+  const [activeTab, setActiveTab] = useState('home');
 
   // Mouse position tracking for hover effects
   useEffect(() => {
@@ -24,9 +26,10 @@ function App() {
   }, []);
 
   const navigation = [
+    { id: 'home', name: 'Home', icon: <HomeIcon className="w-5 h-5" /> },
     { id: 'dashboard', name: 'Dashboard', icon: <Layout className="w-5 h-5" /> },
     { id: 'network', name: 'Network Monitor', icon: <BarChart2 className="w-5 h-5" /> },
-    { id: 'vulnerabilities', name: 'Vulnerability Scanner', icon: <Search className="w-5 h-5" /> }
+    { id: 'vulnerabilities', name: 'Scanner', icon: <Search className="w-5 h-5" /> }
   ];
 
   return (
@@ -38,11 +41,11 @@ function App() {
         <div className="p-6">
           <div 
             className="flex items-center space-x-3 mb-8 hover-card p-4 rounded-lg glitch-container"
-            data-text="NetVulnSecure"
+            data-text="NetGuard"
           >
             <Shield className="w-8 h-8 text-teal-400" />
             <span className="text-xl font-bold text-holographic">
-              NetVulnSecure
+              NetGuard
             </span>
           </div>
           
@@ -68,13 +71,17 @@ function App() {
       {/* Main Content */}
       <div className="flex-1 overflow-auto relative z-10">
         <div className="fade-in">
+          {activeTab === 'home' && <Home />}
           {activeTab === 'dashboard' && <Dashboard />}
           {activeTab === 'network' && <NetworkMonitor />}
           {activeTab === 'vulnerabilities' && <VulnerabilityScanner />}
         </div>
       </div>
+
+      {/* Integrated Terminal */}
+      <Terminal />
     </div>
   );
 }
 
-export default App;
+export default App

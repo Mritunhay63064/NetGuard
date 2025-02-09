@@ -1,3 +1,4 @@
+import re
 from typing import Optional,List
 from fastapi import FastAPI,BackgroundTasks, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
@@ -10,6 +11,7 @@ from pydantic import BaseModel
 from collections import deque
 import subprocess
 import logging
+from influxdb import InfluxDBClient
 
 app=FastAPI()
 app.add_middleware(
@@ -22,6 +24,44 @@ app.add_middleware(
 PORT = 8000
 INTERFACE='wlp0s20f3'
 
+my_client=InfluxDBClient(host='localhost',port=8086)
+my_client.switch_database('network_data')
+def classify_alert(packet_info):
+    """Classify the packet for potential security threats"""
+    alert = None
+    unusual_ports = [23, 445, 3389, 8080]  # Common attack ports
+    external_ips = ["185.", "34.", "169."]  # Example external IP prefixes
+
+    if packet_info["length"] > 1000:
+        alert = "large_packet"
+    elif packet_info["dest_port"] in unusual_ports:
+        alert = "unusual_port"
+    elif any(packet_info["dest_ip"].startswith(ip) for ip in external_ips):
+        alert = "external_traffic"
+    
+    return alert or "normal"
+
+def write_to_db(packet_info):
+    json_body=[
+        {
+            "measurement":"packets",
+            "tags":{
+                "protocol":packet_info['protocol'],
+                "source_ip":packet_info['source_ip'],
+                "dest_ip":packet_info['dest_ip'],
+                "alert": classify_alert(packet_info)
+                
+            },
+            "fields": {
+                "packet_size": packet_info["length"],
+                "source_port": packet_info.get("source_port"),
+                "dest_port": packet_info.get("dest_port"),
+                
+                
+            }
+        }
+    ]
+    my_client.write_points(json_body)
 logging.basicConfig(level=logging.INFO)
 logger=logging.getLogger(__name__)
 
@@ -59,6 +99,7 @@ def process_packet(packet):
             packet_info["protocol"] = "UDP"
             packet_info["source_port"] = packet[UDP].sport
             packet_info["dest_port"] = packet[UDP].dport
+    write_to_db(packet_info)        
     packet_buffer.append(packetInfo(**packet_info))    
 
 def capture_packet():
@@ -112,7 +153,54 @@ def stop_capturing():
     if capturing_thread:
         capturing_thread.join()
         capturing_thread=None
-    return {"message": "Packet capture stopped"}    
+    return {"message": "Packet capture stopped"} 
+
+class BlockRequest(BaseModel):
+    ip: str
+
+def get_mac_address(ip: str) -> str:
+    try:
+        # Run the ARP command to find the MAC address
+        cmd = f"arp -n {ip}"
+        # arp -n | grep 192.168.1.3
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+        if result.returncode != 0:
+            return None
+
+        # Extract MAC address using regex
+        match = re.search(r"([0-9A-Fa-f:]{17})", result.stdout)
+        if match:
+            return match.group(1)
+        return None
+    except Exception as e:
+        return None
+
+@app.post("/block")
+def block_ip(request: BlockRequest):
+    ip = request.ip
+
+    # Validate IP format (basic check)
+    if not ip.count('.') == 3:
+        raise HTTPException(status_code=400, detail="Invalid IP address")
+
+    # Get the MAC address of the given IP
+    mac = get_mac_address(ip)
+    if not mac:
+        raise HTTPException(status_code=404, detail=f"MAC address for {ip} not found")
+
+    try:
+        # Block the MAC address using ebtables
+        cmd = f"ebtables -A INPUT -s {mac} -j DROP"
+        result = subprocess.run(cmd, shell=True, capture_output=True, text=True)
+
+        if result.returncode == 0:
+            return {"message": f"IP {ip} (MAC: {mac}) blocked successfully"}
+        else:
+            return {"error": result.stderr}
+
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 
@@ -195,3 +283,5 @@ if __name__=="__main__":
 # packetInfo(key1=value1, key2=value2, ...)
 
 # sniff(ifcae=interface_name,prn=function_to_process_that packet,store=0 iska mtlb dont store it in RAM , count=1 iska mtlb catch one packet only at a time ,filter='ip')
+
+# sudo $(which python3) main.py

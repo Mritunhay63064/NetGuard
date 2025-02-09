@@ -5,7 +5,7 @@ import { Shield, Clock, Radio, RefreshCw, Filter } from 'lucide-react';
 const mockDevices: NetworkDevice[] = [
   {
     id: '1',
-    ip: '192.168.1.100',
+    ip: '192.168.1.7',
     connectionDuration: '2h 15m',
     protocol: 'TCP',
     ports: ['80', '443'],
@@ -14,7 +14,7 @@ const mockDevices: NetworkDevice[] = [
   },
   {
     id: '2',
-    ip: '192.168.1.101',
+    ip: '192.168.1.3',
     connectionDuration: '45m',
     protocol: 'UDP',
     ports: ['53'],
@@ -77,34 +77,21 @@ export function NetworkMonitor() {
         </div>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-        <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 shadow-2xl hover-card">
+      <div className="grid grid-cols-1  gap-6">
+        <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 shadow-2xl ">
           <h2 className="text-xl font-semibold text-gray-100 mb-4">Traffic Analysis</h2>
-          <div className="aspect-[16/9] bg-black/50 rounded-lg flex items-center justify-center border border-gray-800/50">
-            <span className="text-gray-400">Traffic Graph</span>
-          </div>
+          <div className="bg-gray-900/50 p-6 rounded-lg border border-gray-800">
+        <iframe
+          src="http://localhost:3000/d/eebzend3lr7k0f/net-guard?orgId=1&from=2025-02-08T21:46:10.000Z&to=2025-02-08T21:51:10.000Z&timezone=browser&refresh=5s"
+          width="100%"
+          height="600"
+          frameBorder="0"
+          title="Grafana Dashboard"
+        />
+      </div>
         </div>
 
-        <div className="bg-gray-900/50 backdrop-blur-sm rounded-xl p-6 shadow-2xl hover-card">
-          <h2 className="text-xl font-semibold text-gray-100 mb-4">Network Metrics</h2>
-          <div className="grid grid-cols-2 gap-4">
-            <MetricCard
-              icon={<Shield className="w-5 h-5" />}
-              label="Active Connections"
-              value="28"
-            />
-            <MetricCard
-              icon={<Clock className="w-5 h-5" />}
-              label="Avg. Response Time"
-              value="45ms"
-            />
-            <MetricCard
-              icon={<Radio className="w-5 h-5" />}
-              label="Bandwidth Usage"
-              value="45.8 MB/s"
-            />
-          </div>
-        </div>
+        
       </div>
     </div>
   );

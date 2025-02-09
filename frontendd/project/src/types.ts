@@ -1,4 +1,3 @@
-
 export interface ScanResponse {
   scan_id: string;
   status: string;
